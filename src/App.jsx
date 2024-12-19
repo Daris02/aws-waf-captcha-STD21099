@@ -1,18 +1,25 @@
-import { useEffect } from 'react'
 import './App.css'
-import AWSWAFCaptchaModal from './AWSWAFCaptchaModal'
+import { useState } from 'react'
 import axiosInstance from './axiosInstance'
+import AWSWAFCaptchaModal from './AWSWAFCaptchaModal'
 
 function App() {
-  useEffect(() => {
-    axiosInstance
-      .get(`/whoami`)
-        .then((res) => res);
-  });
+  const [count, setCount] = useState();
+
+  const handSubmit = (e) => {
+    e.preventDefault()
+    console.log(count)
+    axiosInstance.get('/whoami', count)
+      .then((res) => console.log(res))
+  }
 
   return (
     <>
-      <button>Show my captcha</button>
+      <h2>Forbidden Sequence Form</h2>
+      <form onSubmit={handSubmit}>
+        <input type="number" onChange={(e) => setCount(e.target.value)} />
+        <button type='submit'>Submit sequences</button>
+      </form>
       <AWSWAFCaptchaModal />
     </>
   )
