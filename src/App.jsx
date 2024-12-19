@@ -4,31 +4,32 @@ import axiosInstance from './axiosInstance'
 
 function App() {
   const [count, setCount] = useState();
-  const [sequences, setSequences] = useState(0);
   const [showSeq, setShowSeq] = useState(false);
 
   const handSubmit = (e) => {
     e.preventDefault()
-    console.log(count)
     axiosInstance.get('/whoami', count)
       .then((res) => {
         console.log(res);
-        setShowSeq(false);
+        setShowSeq(true);
       })
       .catch((error) => {
-        if (error.status != 405 && sequences <= 100) {
-          setShowSeq(true);
+        if (error.status != 405 && count <= 100) {
+          setShowSeq(false);
         }
       });
-      setShowSeq(true);
   }
 
-  // const allSequences = () {
-  //   const allSequences = document.createElement('div');
-  //   for (let i = 1, i < sequences; i++) {
-
-  //   }
-  // }
+  const allSequences = () => {
+    if (count <= 0) return null;
+    return (
+      <ul>
+        {Array.from({ length: count }, (_, i) => (
+          <li key={i}>{i + 1}. Forbidden</li>
+        ))}
+      </ul>
+    );
+  };
 
   return (
     <>
@@ -38,7 +39,7 @@ function App() {
         <button type='submit'>Submit sequences</button>
       </form>
       <div>
-        {showSeq}
+        {showSeq && allSequences()}
       </div>
     </>
   )
