@@ -8,8 +8,6 @@ const axiosInstance = axios.create({
   timeout: 5000,
 });
 
-
-
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
@@ -17,6 +15,7 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 405) {
       console.warn('Captcha requis par AWS WAF.');
+      handleCaptchaChallenge();
     }
 
     return Promise.reject(error);
@@ -25,8 +24,6 @@ axiosInstance.interceptors.response.use(
 
 axiosInstance.interceptors.request.use(
   (request) => {
-
-    console.log(BASE_URL);
     // Ajouter les headers nécessaires pour l'API AWS WAF
     request.headers["x-aws-waf-token"] = window.AwsWafCaptcha?.getToken;
     return request;
