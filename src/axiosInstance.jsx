@@ -24,10 +24,13 @@ axiosInstance.interceptors.response.use(
 
 axiosInstance.interceptors.request.use(
   (request) => {
-    // Ajouter les headers nécessaires pour l'API AWS WAF
-    request.headers["x-aws-waf-token"] = window.AwsWafCaptcha?.getToken;
-    return request;
-  }
+    return window.AwsWafIntegration?.getToken().then((token) => {
+      // add the header x-aws-waf-token: token if doing cross domain requests
+      request.headers["x-aws-waf-token"] = window.AwsWafCaptcha?.getToken;
+      return request;
+    });
+  },
+  (_) => Promise.reject(_)
 )
 
 function handleCaptchaChallenge() {

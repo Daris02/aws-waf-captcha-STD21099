@@ -5,27 +5,47 @@ import axiosInstance from './axiosInstance'
 function App() {
   const [count, setCount] = useState();
   const [showSeq, setShowSeq] = useState(false);
+  const [totalCount, setTotalCount] = useState(1);
 
   const handSubmit = (e) => {
     e.preventDefault()
-    axiosInstance.get('/whoami', count)
-      .then((res) => {
-        console.log(res);
-        setShowSeq(true);
-      })
-      .catch((error) => {
-        if (error.status != 405 && count <= 100) {
-          setShowSeq(false);
-        }
-      });
+    let requestCount = 0;
+    let stopRequest = false;
+
+    const sendRequest = () => {
+      if (requestCount >= count || stopRequest) return;
+
+      axiosInstance
+        .get('/whoami')
+        .then(() => {
+          console.log('Request succeeded');
+        })
+        .catch((error) => {
+          if (error.response && error.response.status === 403) {
+            setShowSeq(true);
+            setTotalCount((prevTotal) => prevTotal + 1);
+          }
+          if (error.status === 405) {
+            stopRequest = true;
+          };
+        })
+        .finally(() => {
+          requestCount++;
+          if (requestCount < count && !stopRequest) {
+            setTimeout(sendRequest, 1000);
+          }
+        });
+    };
+
+    sendRequest();
   }
 
   const allSequences = () => {
-    if (count <= 0) return null;
+    if (totalCount <= 0) return null;
     return (
       <ul>
-        {Array.from({ length: count }, (_, i) => (
-          <li key={i}>{i + 1}. Forbidden</li>
+        {Array.from({ length: totalCount }, (_, i) => (
+          i === 0 ? null : <li key={i}>{i}. Forbidden</li>
         ))}
       </ul>
     );
@@ -34,10 +54,18 @@ function App() {
   return (
     <>
       <h2>Forbidden Sequence Form</h2>
-      <form onSubmit={handSubmit}>
-        <input type="number" onChange={(e) => setCount(e.target.value)} />
-        <button type='submit'>Submit sequences</button>
-      </form>
+      <div>
+        <form onSubmit={handSubmit}>
+          <div><input
+            type="number"
+            value={count}
+            onChange={(e) => setCount(e.target.valueAsNumber)}
+            min="1"
+            max="1000"
+            /></div>
+          <button type='submit'>Submit sequences</button>
+        </form>
+      </div>
       <div>
         {showSeq && allSequences()}
       </div>
