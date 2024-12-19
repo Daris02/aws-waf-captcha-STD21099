@@ -1,11 +1,14 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
+const API_KEY = import.meta.env.VITE_CAPTCHA_API_KEY;
 
 const axiosInstance = axios.create({
   baseURL: `${BASE_URL}`,
   timeout: 5000,
 });
+
+
 
 axiosInstance.interceptors.response.use(
   (response) => {
@@ -22,6 +25,8 @@ axiosInstance.interceptors.response.use(
 
 axiosInstance.interceptors.request.use(
   (request) => {
+
+    console.log(BASE_URL);
     // Ajouter les headers nécessaires pour l'API AWS WAF
     request.headers["x-aws-waf-token"] = window.AwsWafCaptcha?.getToken;
     return request;
@@ -62,7 +67,7 @@ function renderCaptcha(
         onPuzzleIncorrect: () => onCaptchaEvent("onPuzzleIncorrect"),
         onPuzzleCorrect: () => onCaptchaEvent("onPuzzleCorrect"),
 
-        apiKey: import.meta.env.VITE_CAPTCHA_API_KEY,
+        apiKey: API_KEY,
       }
     );
   });
