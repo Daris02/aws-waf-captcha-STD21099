@@ -4,11 +4,10 @@ import axiosInstance from './axiosInstance'
 
 function App() {
   const [count, setCount] = useState();
-  const [showSeq, setShowSeq] = useState(false);
   const [totalCount, setTotalCount] = useState(1);
 
   const handSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     let requestCount = 0;
     let stopRequest = false;
 
@@ -22,7 +21,6 @@ function App() {
         })
         .catch((error) => {
           if (error.response && error.response.status === 403) {
-            setShowSeq(true);
             setTotalCount((prevTotal) => prevTotal + 1);
           }
           if (error.status === 405) {
@@ -37,6 +35,7 @@ function App() {
         });
     };
 
+    setTotalCount(1);
     sendRequest();
   }
 
@@ -67,7 +66,7 @@ function App() {
         </form>
       </div>
       <div>
-        {showSeq && allSequences()}
+        {allSequences()}
       </div>
     </>
   )
