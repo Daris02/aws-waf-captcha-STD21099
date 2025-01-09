@@ -3,9 +3,6 @@ import axios from 'axios';
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_KEY = import.meta.env.VITE_CAPTCHA_API_KEY;
 
-console.log(import.meta.env.VITE_JSAPI_URL);
-
-
 const axiosInstance = axios.create({
   baseURL: `${BASE_URL}`,
   timeout: 5000,
@@ -29,6 +26,8 @@ axiosInstance.interceptors.request.use(
   (request) => {
     return window.AwsWafIntegration?.getToken().then((token) => {
       // add the header x-aws-waf-token: token if doing cross domain requests
+      console.log("Token awf: " + token);
+      
       request.headers["x-aws-waf-token"] = token;
       return request;
     });
