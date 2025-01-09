@@ -8,73 +8,33 @@ const axiosInstance = axios.create({
   timeout: 5000,
 });
 
-let stopRequest = false;
-let pendingRequests = [];
-
-
-// axiosInstance.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   (error) => {
-//     if (error.response && error.response.status === 405) {
-//       console.warn('Captcha requis par AWS WAF.');
-//       handleCaptchaChallenge();
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    return response;
+  },
   (error) => {
     if (error.response && error.response.status === 405) {
-      console.warn("Captcha requis. Mise en pause des requêtes.");
-      stopRequest = true;
+      console.warn('Captcha requis par AWS WAF.');
       handleCaptchaChallenge();
     }
     return Promise.reject(error);
   }
 );
 
-// axiosInstance.interceptors.request.use(
-//   (request) => {
-//     return window.AwsWafIntegration?.getToken().then((token) => {
-//       request.headers["x-aws-waf-token"] = token;
-//       return request;
-//     });
-//   },
-//   (_) => Promise.reject(_)
-// )
+
 axiosInstance.interceptors.request.use(
   (request) => {
-    if (stopRequest) {
-      return new Promise((resolve) => {
-        pendingRequests.push(() => resolve(request));
-      });
-    }
     return window.AwsWafIntegration?.getToken().then((token) => {
       request.headers["x-aws-waf-token"] = token;
       return request;
     });
   },
   (_) => Promise.reject(_)
-);
+)
 
-// function handleCaptchaChallenge() {
-//   renderCaptcha().then(() => {
-//     return axiosInstance.request();
-//   });
-// }
 function handleCaptchaChallenge() {
   renderCaptcha().then(() => {
-    // Reprendre les requêtes après résolution du CAPTCHA
-    stopRequest = false;
-    while (pendingRequests.length > 0) {
-      const resumeRequest = pendingRequests.shift();
-      resumeRequest();
-    }
+    return axiosInstance.request();
   });
 }
 
