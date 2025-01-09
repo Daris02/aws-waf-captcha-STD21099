@@ -25,9 +25,6 @@ axiosInstance.interceptors.response.use(
 axiosInstance.interceptors.request.use(
   (request) => {
     return window.AwsWafIntegration?.getToken().then((token) => {
-      // add the header x-aws-waf-token: token if doing cross domain requests
-      console.log("Token awf: " + token);
-      
       request.headers["x-aws-waf-token"] = token;
       return request;
     });
