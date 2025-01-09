@@ -3,6 +3,9 @@ import axios from 'axios';
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_KEY = import.meta.env.VITE_CAPTCHA_API_KEY;
 
+console.log(import.meta.env.VITE_JSAPI_URL);
+
+
 const axiosInstance = axios.create({
   baseURL: `${BASE_URL}`,
   timeout: 5000,
@@ -26,7 +29,7 @@ axiosInstance.interceptors.request.use(
   (request) => {
     return window.AwsWafIntegration?.getToken().then((token) => {
       // add the header x-aws-waf-token: token if doing cross domain requests
-      request.headers["x-aws-waf-token"] = window.AwsWafCaptcha?.getToken;
+      request.headers["x-aws-waf-token"] = token;
       return request;
     });
   },
@@ -34,7 +37,7 @@ axiosInstance.interceptors.request.use(
 )
 
 function handleCaptchaChallenge() {
-  renderCaptcha().then((resToken) => {
+  renderCaptcha().then(() => {
     return axiosInstance.request();
   });
 }
